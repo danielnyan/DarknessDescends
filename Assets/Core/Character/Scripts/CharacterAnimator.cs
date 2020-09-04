@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using GDG;
 
-[RequireComponent(typeof(Animator))]
 public class CharacterAnimator : MonoBehaviour
 {
     protected bool facingDirection = true; //true means spirte is facing right
@@ -11,7 +10,7 @@ public class CharacterAnimator : MonoBehaviour
 
     void Start()
     {
-        animator = GetComponent<Animator>();
+        animator = GetComponentInChildren<Animator>();
     }
 
     public void Move(bool isMoving = true)

@@ -28,7 +28,7 @@
 
 		Pass
 		{
-		CGPROGRAM
+			CGPROGRAM
 			#pragma vertex vert
 			#pragma fragment frag
 			#pragma multi_compile _ PIXELSNAP_ON
@@ -45,7 +45,7 @@
 			{
 				float4 vertex   : POSITION;
 				fixed4 color    : COLOR;
-				float2 texcoord  : TEXCOORD0;
+				float2 texcoord : TEXCOORD0;
 				fixed4 grabPos  : TEXCOORD1;
 			};
 			

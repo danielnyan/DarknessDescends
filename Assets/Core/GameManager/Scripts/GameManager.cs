@@ -1,86 +1,89 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.SceneManagement;
 
 namespace GDG
 {
-public class GameManager : Manager<GameManager>
-{
-    public enum GameState
+    public class GameManager : Manager<GameManager>
     {
-        Pregame,
-        Running,
-        Paused,
-        Postgame
-    }
-    public GameState CurrentGameState { get; set; } = GameState.Pregame;
-
-    void Start()
-    {
-        UpdateState(GameState.Running);
-    }
-
-    void Update()
-    {
-        if (CurrentGameState == GameState.Pregame)
+        public enum GameState
         {
-            return;
+            Pregame,
+            Running,
+            Paused,
+            Postgame
+        }
+        public GameState CurrentGameState { get; set; } = GameState.Pregame;
+
+        public override void Awake()
+        {
+            base.Awake();
+            SceneManager.sceneLoaded += (scene, mode) =>
+            {
+                UpdateState(GameState.Running);
+            };
         }
 
-        if (Input.GetKeyDown(KeyCode.P))
+        void Update()
         {
-            TogglePause();
+            if (CurrentGameState == GameState.Pregame)
+            {
+                return;
+            }
+
+            if (Input.GetKeyDown(KeyCode.P))
+            {
+                TogglePause();
+            }
+
+            if (Input.GetKeyDown(KeyCode.R))
+            {
+                RestartGame();
+            }
         }
 
-        if (Input.GetKeyDown(KeyCode.R))
+        private void UpdateState(GameState state)
         {
-            RestartGame();
-        }
-    }
+            GameState previousGameState = CurrentGameState;
+            CurrentGameState = state;
 
-    private void UpdateState(GameState state)
-    {
-        GameState previousGameState = CurrentGameState;
-        CurrentGameState = state;
-
-        // ReSharper disable once SwitchStatementMissingSomeCases
-        switch (CurrentGameState)
-        {
-            case GameState.Pregame:
-                Time.timeScale = 1.0f;
-                break;
-            case GameState.Running:
-                Time.timeScale = 1.0f;
-                break;
-            case GameState.Paused:
-                Time.timeScale = 0.0f;
-                break;
-        }
-        EventManager.Instance.Raise(new GameStateChangedEvent
+            // ReSharper disable once SwitchStatementMissingSomeCases
+            switch (CurrentGameState)
+            {
+                case GameState.Pregame:
+                    Time.timeScale = 1.0f;
+                    break;
+                case GameState.Running:
+                    Time.timeScale = 1.0f;
+                    break;
+                case GameState.Paused:
+                    Time.timeScale = 0.0f;
+                    break;
+            }
+            EventManager.Instance.Raise(new GameStateChangedEvent
             {
                 currentGameState = CurrentGameState,
                 previousGameState = previousGameState
             }
-        );
+            );
+        }
+
+        public void TogglePause()
+        {
+            UpdateState(CurrentGameState == GameState.Running ?
+                GameState.Paused : GameState.Running);
+        }
+
+        public void RestartGame()
+        {
+            UpdateState(GameState.Pregame);
+            SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+            UpdateState(GameState.Running);
+        }
     }
 
-    public void TogglePause()
+    public class GameStateChangedEvent : GameEvent
     {
-        UpdateState(CurrentGameState == GameState.Running ?
-            GameState.Paused : GameState.Running);
+        public GameManager.GameState currentGameState;
+        public GameManager.GameState previousGameState;
     }
-
-    public void RestartGame()
-    {
-        UpdateState(GameState.Pregame);
-        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
-    }
-}
-
-public class GameStateChangedEvent : GameEvent
-{
-    public GameManager.GameState currentGameState;
-    public GameManager.GameState previousGameState;
-}
 }

@@ -2,112 +2,111 @@
 
 namespace GDG
 {
-using static GameManager;
-public class GameplayController :  Singleton<GameplayController>
-{
-    public GameLogicManager gameLogic;
-    public DropManager dropManager;
-
-    bool isGameRunning = false;
-    float timeSinceGameStart = 0.0f;
-    SaveData saveData;
-
-    protected override void Awake()
+    using static GameManager;
+    public class GameplayController : Singleton<GameplayController>
     {
-        base.Awake();
-        EventManager.Instance.AddListener<GameStateChangedEvent>(OnGameStateChanged);
+        public GameLogicManager gameLogic;
+        public DropManager dropManager;
 
-    }
-    protected override void OnDestroy()
-    {
-        base.OnDestroy();
-        EventManager.Instance.RemoveListener<GameStateChangedEvent>(OnGameStateChanged);
-    }
+        bool isGameRunning = false;
+        float timeSinceGameStart = 0.0f;
+        SaveData saveData;
 
-    void OnGameStateChanged(GameStateChangedEvent e)
-    {
-        if (e.previousGameState == GameState.Pregame &&
-            e.currentGameState == GameState.Running)
+        protected override void Awake()
         {
-            StartGame();
+            base.Awake();
+            EventManager.Instance.AddListener<GameStateChangedEvent>(OnGameStateChanged);
+        }
+        protected override void OnDestroy()
+        {
+            base.OnDestroy();
+            EventManager.Instance.RemoveListener<GameStateChangedEvent>(OnGameStateChanged);
         }
 
-        if (e.previousGameState == GameState.Paused &&
-            e.currentGameState != GameState.Paused)
+        void OnGameStateChanged(GameStateChangedEvent e)
         {
-            TogglePauseGame(false);
-        }
-        else if (e.previousGameState != GameState.Paused &&
-            e.currentGameState == GameState.Paused)
-        {
-            TogglePauseGame(true);
-        }
-    }
+            if (e.previousGameState == GameState.Pregame &&
+                e.currentGameState == GameState.Running)
+            {
+                StartGame();
+            }
 
-    void StartGame()
-    {
-        saveData = SaveData.LoadSaveData();
-        if(saveData != null)
-        {
-            UpdateStateBasedOnSaveData(saveData);
-        }
-        timeSinceGameStart = 0.0f;
-        isGameRunning = true;
-        EventManager.Instance.Raise(new GameStartEvent {});
-    }
-
-    void TogglePauseGame(bool toggle)
-    {
-        UIManager.Instance.TogglePauseMenu(toggle);
-    }
-
-    void Update()
-    {
-        if (isGameRunning)
-        {
-            float timeElapsedFromPreviousFrame = Time.deltaTime;
-            timeSinceGameStart += timeElapsedFromPreviousFrame;
-            UIManager.Instance.UpdateTime(timeSinceGameStart);
+            if (e.previousGameState == GameState.Paused &&
+                e.currentGameState != GameState.Paused)
+            {
+                TogglePauseGame(false);
+            }
+            else if (e.previousGameState != GameState.Paused &&
+                e.currentGameState == GameState.Paused)
+            {
+                TogglePauseGame(true);
+            }
         }
 
-        if (Input.GetKeyDown(KeyCode.F))
+        void StartGame()
         {
-            SaveData.DeleteSaveData();
+            saveData = SaveData.LoadSaveData();
+            if (saveData != null)
+            {
+                UpdateStateBasedOnSaveData(saveData);
+            }
+            timeSinceGameStart = 0.0f;
+            isGameRunning = true;
+            EventManager.Instance.Raise(new GameStartEvent { });
+        }
+
+        void TogglePauseGame(bool toggle)
+        {
+            // Display pause menu is migrated to UIManager.cs
+        }
+
+        void Update()
+        {
+            if (isGameRunning)
+            {
+                float timeElapsedFromPreviousFrame = Time.deltaTime;
+                timeSinceGameStart += timeElapsedFromPreviousFrame;
+                UIManager.Instance.UpdateTime(timeSinceGameStart);
+            }
+
+            if (Input.GetKeyDown(KeyCode.F))
+            {
+                SaveData.DeleteSaveData();
+            }
+        }
+
+        public void OnEnemyDeath(IEnemy enemy)
+        {
+            gameLogic.OnEnemyDeath(enemy);
+            dropManager.DropReward(enemy);
+        }
+
+        public void OnHeroDeath(IHero hero)
+        {
+            GameOver();
+        }
+
+        void GameOver()
+        {
+            RecordSavedData();
+            SoundManager.Instance.PlayGameOver();
+            UIManager.Instance.DisplayEndGame();
+            isGameRunning = false;
+            EventManager.Instance.Raise(new GameOverEvent { });
+        }
+
+        void RecordSavedData()
+        {
+            saveData = SaveData.RecordHighscoreIntoSave(gameLogic.GetHighScore());
+        }
+
+        void UpdateStateBasedOnSaveData(SaveData incomingSaveData)
+        {
+            Debug.Log(incomingSaveData.highScore);
+            gameLogic.SetHighScore(incomingSaveData.highScore);
         }
     }
 
-    public void OnEnemyDeath(IEnemy enemy)
-    {
-        gameLogic.OnEnemyDeath(enemy);
-        dropManager.DropReward(enemy);
-    }
-
-    public void OnHeroDeath(IHero hero)
-    {
-        GameOver();
-    }
-
-    void GameOver()
-    {
-        RecordSavedData();
-        SoundManager.Instance.PlayGameOver();
-        UIManager.Instance.DisplayEndGame();
-        isGameRunning = false;
-        EventManager.Instance.Raise(new GameOverEvent {});
-    }
-
-    void RecordSavedData()
-    {
-        saveData = SaveData.RecordHighscoreIntoSave(gameLogic.GetHighScore());
-    }
-
-    void UpdateStateBasedOnSaveData(SaveData incomingSaveData)
-    {
-        Debug.Log(incomingSaveData.highScore);
-        gameLogic.SetHighScore(incomingSaveData.highScore);
-    }
-}
-
-public class GameStartEvent : GameEvent { }
-public class GameOverEvent : GameEvent { }
+    public class GameStartEvent : GameEvent { }
+    public class GameOverEvent : GameEvent { }
 }
