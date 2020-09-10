@@ -16,7 +16,7 @@ namespace danielnyan
             killing = false;
         }
 
-        public void KillProjectile()
+        public virtual void KillProjectile()
         {
             if (!killing)
             {
