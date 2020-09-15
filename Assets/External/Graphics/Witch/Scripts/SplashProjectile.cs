@@ -16,7 +16,7 @@ namespace danielnyan
                 Instantiate(instantiatedObject, transform.position, Quaternion.identity);
                 if (killParent)
                 {
-                    ContinuousRigidbodyProjectile k = transform.root.GetComponent<ContinuousRigidbodyProjectile>();
+                    ContinuousRigidbodyProjectile k = transform.parent.GetComponent<ContinuousRigidbodyProjectile>();
                     if (k != null)
                     {
                         k.KillProjectile();
@@ -36,7 +36,7 @@ namespace danielnyan
             Instantiate(instantiatedObject, transform.position, Quaternion.identity);
             if (killParent)
             {
-                ContinuousRigidbodyProjectile k = transform.root.GetComponent<ContinuousRigidbodyProjectile>();
+                ContinuousRigidbodyProjectile k = transform.parent.GetComponent<ContinuousRigidbodyProjectile>();
                 if (k != null)
                 {
                     k.KillProjectile();
@@ -50,7 +50,7 @@ namespace danielnyan
             Instantiate(instantiatedObject, transform.position, Quaternion.identity);
             if (killParent)
             {
-                ContinuousRigidbodyProjectile k = transform.root.GetComponent<ContinuousRigidbodyProjectile>();
+                ContinuousRigidbodyProjectile k = transform.parent.GetComponent<ContinuousRigidbodyProjectile>();
                 if (k != null)
                 {
                     k.KillProjectile();

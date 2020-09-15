@@ -44,7 +44,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d9c01f5c2caf1a347a1d8dc43a402d02, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  instantiatedObject: {fileID: 7098910698355294917, guid: 1b8f8143c1a835048abb24cd2ec50cac,
+  instantiatedObject: {fileID: 7098910698355294917, guid: c5b70c5d3ff86b84d98462e965a23cfe,
     type: 3}
   damageSource: 0
   killParent: 1
@@ -133,6 +133,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   killTime: 5
+  freezeRigidbody: 1
 --- !u!1001 &4134683698816049014
 PrefabInstance:
   m_ObjectHideFlags: 0

@@ -12,6 +12,7 @@ namespace danielnyan
         {
             if (freezeRigidbody)
             {
+                Debug.Log("Freezing Projectile");
                 GetComponent<Rigidbody2D>().constraints = RigidbodyConstraints2D.FreezeAll;
             }
             base.KillProjectile();
